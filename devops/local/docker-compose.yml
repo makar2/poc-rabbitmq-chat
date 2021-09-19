@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  node:
+    command: sh ./devops/local/in-docker-git.sh
+    volumes:
+      - ./devops:/app/devops
+      - ./docker-compose.yml:/app/docker-compose.yml
+      - ./Dockerfile:/app/Dockerfile
+      - ./.dockerignore:/app/.dockerignore
+      - ./.git:/app/.git
+      - ./.gitignore:/app/.gitignore
+      - ./Makefile:/app/Makefile
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./src:/app/src
+      - ./tsconfig.json:/app/tsconfig.json

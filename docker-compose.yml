@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rmq-data:/var/lib/rabbitmq/
+      - rmq-logs:/var/log/rabbitmq
+    networks:
+        - rabbitmq-chat
+
+  node:
+    image: ${NODE_IMAGE_NAME:-rabbitmq-chat-node}
+    build: .
+    networks:
+      - rabbitmq-chat
+
+volumes:
+  rmq-data:
+  rmq-logs:
+
+networks:
+  rabbitmq-chat:

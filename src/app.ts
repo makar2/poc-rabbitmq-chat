@@ -17,14 +17,11 @@ let id: string | null = process.env.ID || null;
 let chat: string | null = process.env.CHAT || null;
 
 if (!id) {
-  // eslint-disable-next-line brace-style
   rl.question('What is your ID? ', (i: string) => { id = i; });
 }
 
 if (!chat) {
-  rl.question('What chat do you want to access? ', (ii: string) => {
-    chat = ii;
-  });
+  rl.question('What chat do you want to access? ', (ii: string) => { chat = ii; });
 }
 
 const name: string | undefined = TEACHERS.find(el => el.id === id)?.name;
@@ -54,8 +51,6 @@ amqp.connect('amqp://guest:guest@rabbitmq:5672', (error0, connection) => {
     channel.consume(queue, (msg: Message | null) => {
       const { message } = msg && JSON.parse(msg.content.toString());
       console.log(message);
-    }, {
-      noAck: true,
     });
   });
 });

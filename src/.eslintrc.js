@@ -20,7 +20,7 @@ module.exports = {
     // v.1.4 (2021-09-20)
     '@typescript-eslint/no-explicit-any': 0,
     'arrow-parens': [1, 'as-needed'],
-    'brace-style': [1, 'stroustrup'],
+    'brace-style': [1, 'stroustrup', { allowSingleLine: true }],
     'class-methods-use-this': 0,
     'func-names': [1, 'always', { generators: 'never' }],
     'import/extensions': 0,

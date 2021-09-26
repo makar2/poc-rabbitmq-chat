@@ -1,27 +1,93 @@
 import readline from 'readline';
 import dotenvFlow from 'dotenv-flow';
+import amqp, { Message } from 'amqplib/callback_api';
 import { TEACHERS } from '@/common/constants';
 
 dotenvFlow.config();
 
 /**
- * Set user's name and preferred channel
+ * Set user's name and preferred chat
  */
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-let id: string | null = process.env.ID || null;
-let channel: string | null = process.env.CHANNEL || null;
+/**
+ * Connect to RabbitMQ
+ */
+amqp.connect('amqp://guest:guest@rabbitmq:5672', (error0, connection) => {
+  console.info('>>> Connecting to RabbitMQ...');
 
-if (!id) rl.question('What is your ID? ', (i: string) => { id = i; });
+  if (error0) {
+    throw error0;
+  }
 
-if (!channel) rl.question('What channel do you want to access? ', (ii: string) => { channel = ii; });
+  connection.createChannel((error1, channel) => {
+    if (error1) throw error1;
 
-const name: string | undefined = TEACHERS.find(el => el.id === id)?.name;
+    let id: string | undefined = process.env.ID;
+    let name: string | undefined;
+    let chat: string | undefined = process.env.CHAT;
 
-if (name && channel) console.info(`Welcome back ${name}! Connecting to ${channel} channel.`);
-else throw new Error('Unable to access');
+    if (!id) {
+      rl.question('What is your ID? ', (i: string) => {
+        id = i;
+        if (!chat) {
+          rl.question('What chat do you want to access -- general or house? ', (ii: string) => {
+            const obj = TEACHERS.find(el => el.id === id);
+            if (obj) {
+              name = obj.name;
+              if (ii === 'house') chat = obj.house;
+              else if (ii === 'general') chat = 'general';
+              if (chat) console.info(`Welcome back ${name}! Connecting to ${chat} channel...`);
 
-rl.close();
+              else throw new Error('Unable to log in: Chat not found');
+            }
+            else throw new Error('Unable to log in: User ID not found');
+
+            /**
+             * Subscribe to chanel selected by teacher
+             */
+            channel.assertExchange(chat, 'fanout', { durable: false });
+
+            channel.assertQueue('', {
+              exclusive: true,
+            }, (error2, q) => {
+              if (error2) {
+                throw error2;
+              }
+              channel.bindQueue(q.queue, chat || 'general', '');
+
+              channel.consume(q.queue, (msg: Message | null) => {
+                const { author, exchange, message } = msg && JSON.parse(msg.content.toString());
+                console.info(`\n<<< [${exchange}] ${author === name ? 'You' : author}: ${message}`);
+              }, {
+                noAck: true,
+              });
+            });
+
+            /**
+             * Send a message
+             */
+            const looper = () => {
+              rl.question('>>>', (messageOut: string) => {
+                if (messageOut) {
+                  const output = {
+                    author: name,
+                    exchange: chat,
+                    message: messageOut,
+                  };
+                  channel.publish(chat || 'general', '', Buffer.from(JSON.stringify(output)));
+                  looper();
+                }
+              });
+            };
+
+            looper();
+          });
+        }
+      });
+    }
+  });
+});

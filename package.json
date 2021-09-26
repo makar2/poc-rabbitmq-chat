@@ -20,18 +20,22 @@
   },
   "homepage": "https://github.com/makar2/poc-rabbitmq-chat#readme",
   "dependencies": {
-    "amqplib": "^0.8.0"
+    "amqplib": "^0.8.0",
+    "dotenv-flow": "^3.2.0"
   },
   "devDependencies": {
     "@types/amqplib": "^0.8.2",
+    "@types/dotenv-flow": "^3.2.0",
     "@types/node": "^16.9.3",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-import-resolver-typescript": "^2.5.0",
     "eslint-plugin-import": "^2.24.2",
     "nodemon": "^2.0.12",
     "ts-node": "^10.2.1",
+    "tsconfig-paths": "^3.11.0",
     "typescript": "^4.4.3"
   }
 }
